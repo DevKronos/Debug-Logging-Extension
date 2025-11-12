@@ -1,0 +1,7 @@
+# directories
+.vscode/*
+node_modules/*
+out/*
+
+# other
+.vscodeignore

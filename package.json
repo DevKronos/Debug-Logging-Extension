@@ -1,0 +1,102 @@
+{
+  "name": "manual-debug-logging",
+  "displayName": " Manual Debug Logging",
+  "description": "Quickly insert console.log() and other debug print statements for copied variables, arrays, and multiple selections across multiple languages. (very useful extension)",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.67.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "debug",
+    "print",
+    "productivity"
+  ],
+  "activationEvents": [
+    "onCommand:manualDebugLogging.insertPrint",
+    "onCommand:manualDebugLogging.insertArrayPrint",
+    "onCommand:manualDebugLogging.insertMultiplePrints",
+    "onCommand:manualDebugLogging.trackCopy"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "manualDebugLogging.insertPrint",
+        "title": "Insert Print for Copied Variable",
+        "category": "Variable Logging"
+      },
+      {
+        "command": "manualDebugLogging.insertArrayPrint",
+        "title": "Insert Print for Array",
+        "category": "Variable Logging"
+      },
+      {
+        "command": "manualDebugLogging.insertMultiplePrints",
+        "title": "Insert Print for Many Copied Variable",
+        "category": "Variable Logging"
+      },
+      {
+        "command": "manualDebugLogging.trackCopy",
+        "title": "Insert Copied Variable in Buffer",
+        "category": "Variable Buffering"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "manualDebugLogging.insertPrint",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v"
+      },
+      {
+        "command": "manualDebugLogging.insertArrayPrint",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a"
+      },
+      {
+        "command": "manualDebugLogging.insertMultiplePrints",
+        "key": "ctrl+shift+p",
+        "mac": "cmd+shift+p"
+      },
+      {
+        "command": "manualDebugLogging.trackCopy",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c"
+      }
+    ],
+    "configuration": {
+      "title": "Manual Debug Logging",
+      "properties": {
+        "manualDebugLogging.maxBufferSize": {
+          "type": "integer",
+          "default": 10,
+          "description": "Maximal size of buffer"
+        },
+        "manualDebugLogging.customVariableTemplate": {
+          "type": "string",
+          "default": "",
+          "description": "Custom template for logging variables (use {variable} as placeholder)"
+        },
+        "manualDebugLogging.customArrayTemplate": {
+          "type": "string",
+          "default": "",
+          "description": "Custom template for logging arrays (use {array} as placeholder)"
+        }
+      }
+    }
+  },
+  
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.105.0",
+    "@types/node": "22.x",
+    "typescript": "^5.9.3"
+  }
+}
