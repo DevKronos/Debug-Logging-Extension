@@ -7,108 +7,115 @@ export function activate(context: vscode.ExtensionContext) {
 
 	console.log('Logging plugin activated');
 
-	let insertPrint = vscode.commands.registerCommand('manualDebugLogging.insertPrint', async function () {
-		// Insert code to print the value of the last copied variable
+	let insertPrintCommand = vscode.commands.registerCommand('manualDebugLogging.insertPrint', insertPrint);
 
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) {
-			vscode.window.showErrorMessage('No active editor');
-			return;
-		}
-		
-		const clipboardText = await vscode.env.clipboard.readText();
-		if (!clipboardText.trim()){
-			vscode.window.showWarningMessage('Clipboard is empty');
-			return;
-		}
-		
-		const variableName = cleanVariableName(clipboardText);
-		if (!variableName) {
-            vscode.window.showWarningMessage('Could not extract variable name from clipboard');
-            return;
-        }
+	let insertArrayPrintCommand = vscode.commands.registerCommand('manualDebugLogging.insertArrayPrint', insertArrayPrint);
 
-		const printCode = generatePrintCode(variableName, editor);
+	let insertMultiplePrintsCommand = vscode.commands.registerCommand('manualDebugLogging.insertMultiplePrints', insertMultiplePrints);
 
-		await editor.edit(editBuilder => {
-			const position = editor.selection.active;
-			editBuilder.insert(position, printCode);
-		});
+	let trackCopyCommand = vscode.commands.registerCommand('manualDebugLogging.trackCopy', trackCopy);
+
+	context.subscriptions.push(insertPrintCommand, insertArrayPrintCommand, insertMultiplePrintsCommand, trackCopyCommand);
+}
+
+async function insertPrint() {
+	// Insert code to print the value of the last copied variable
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		vscode.window.showErrorMessage('No active editor');
+		return;
+	}
+	
+	const clipboardText = await vscode.env.clipboard.readText();
+	if (!clipboardText.trim()){
+		vscode.window.showWarningMessage('Clipboard is empty');
+		return;
+	}
+	
+	const variableName = cleanVariableName(clipboardText);
+	if (!variableName) {
+        vscode.window.showWarningMessage('Could not extract variable name from clipboard');
+        return;
+    }
+
+	const printCode = generatePrintCode(variableName, editor);
+	await editor.edit(editBuilder => {
+		const position = editor.selection.active;
+		editBuilder.insert(position, printCode);
+	});
+}
+
+async function insertArrayPrint() {
+	// Insert code to print the content of the last copied array variable
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		vscode.window.showErrorMessage('No active editor');
+		return;
+	}
+
+	const clipboardText = await vscode.env.clipboard.readText();
+	if (!clipboardText.trim()) {
+		vscode.window.showErrorMessage('Clipboard is empty');
+		return;
+	}
+
+	const variableName = cleanVariableName(clipboardText);
+	if (!variableName) {
+        vscode.window.showWarningMessage('Could not extract variable name from clipboard');
+        return;
+    }
+
+	const printCode = generateArrayPrintCode(variableName, editor);
+
+	await editor.edit(editBuilder => {
+		const position = editor.selection.active;
+		editBuilder.insert(position, printCode);
 	})
+}
 
-	let insertArrayPrint = vscode.commands.registerCommand('manualDebugLogging.insertArrayPrint', async function () {
-		// Insert code to print the content of the last copied array variable
+async function insertMultiplePrints() {
+	// Insert code for multiple print variables according to selected in the drop-down menu
 
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) {
-			vscode.window.showErrorMessage('No active editor');
-			return;
-		}
-
-		const clipboardText = await vscode.env.clipboard.readText();
-		if (!clipboardText.trim()) {
-			vscode.window.showErrorMessage('Clipboard is empty');
-			return;
-		}
-
-		const variableName = cleanVariableName(clipboardText);
-		if (!variableName) {
-            vscode.window.showWarningMessage('Could not extract variable name from clipboard');
-            return;
-        }
-
-		const printCode = generateArrayPrintCode(variableName, editor);
-
-		await editor.edit(editBuilder => {
-			const position = editor.selection.active;
-			editBuilder.insert(position, printCode);
-		})
-	})
-
-	let insertMultiplePrints = vscode.commands.registerCommand('manualDebugLogging.insertMultiplePrints', async function () {
-		// Insert code for multiple print variables according to selected in the drop-down menu
-
-        const editor = vscode.window.activeTextEditor;
+    const editor = vscode.window.activeTextEditor;
         
-        if (!editor) {
-            vscode.window.showErrorMessage('No active editor');
-            return;
+    if (!editor) {
+        vscode.window.showErrorMessage('No active editor');
+        return;
+    }
+
+    if (copiedVariables.length > 0) {
+        const selectedVars = await showVariableSelector();
+        if (selectedVars && selectedVars.length > 0) {
+            await generateMultiplePrintCode(editor, selectedVars);
         }
+    } else {
+        vscode.window.showInformationMessage('Copy variables to add them in buffer');
+    }
+}
 
-        if (copiedVariables.length > 0) {
-            const selectedVars = await showVariableSelector();
-            if (selectedVars && selectedVars.length > 0) {
-                await insertMultipleVariables(editor, selectedVars);
-            }
-        } else {
-            vscode.window.showInformationMessage('Copy variables to add them in buffer');
-        }
-    });
+function trackCopy() {
+	// Track copying variables and add them in buffer
 
-	let copyDisposable = vscode.commands.registerCommand('manualDebugLogging.trackCopy', async function () {
-		// Track copying variables and add them in buffer
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		vscode.window.showErrorMessage('No active editor');
+		return;
+	}
 
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) {
-			vscode.window.showErrorMessage('No active editor');
-			return;
-		}
+	const selection = editor.selection;
+	const selected = editor.document.getText(selection);
 
-		const selection = editor.selection;
-		const selected = editor.document.getText(selection);
+	const variableName = cleanVariableName(selected);
+	if (!variableName) {
+        vscode.window.showWarningMessage('Could not extract variable name from clipboard');
+        return;
+    }
 
-		const variableName = cleanVariableName(selected);
-		if (!variableName) {
-            vscode.window.showWarningMessage('Could not extract variable name from clipboard');
-            return;
-        }
+	addToBuffer(variableName);
 
-		addToVariableBuffer(variableName);
-
-        vscode.window.showInformationMessage(`Variable ${variableName} is added in buffer`);
-    });
-
-	context.subscriptions.push(insertPrint, insertArrayPrint, insertMultiplePrints, copyDisposable);
+    vscode.window.showInformationMessage(`Variable ${variableName} is added in buffer`);
 }
 
 function generatePrintCode(variableName: string, editor: vscode.TextEditor): string {
@@ -195,7 +202,7 @@ function generateArrayPrintCode(arrayName: string, editor: vscode.TextEditor): s
 	}
 }
 
-async function insertMultipleVariables(editor: vscode.TextEditor, variables: string[]): Promise<void> {
+async function generateMultiplePrintCode(editor: vscode.TextEditor, variables: string[]): Promise<void> {
 	// Generate print code for multiple variable
 
     let printCode = '';
@@ -211,8 +218,8 @@ async function insertMultipleVariables(editor: vscode.TextEditor, variables: str
 }
 
 
-function addToVariableBuffer(variableName: string): void {
-	// Add copied variables in buffer
+function addToBuffer(variableName: string): void {
+	// Add copied variable to buffer
 
     copiedVariables = copiedVariables.filter(v => v !== variableName);
 
@@ -229,7 +236,7 @@ function addToVariableBuffer(variableName: string): void {
 async function showVariableSelector(): Promise<string[]> {
 	// Show drop-down menu to select variables
 
-    if (copiedVariables.length === 0) {
+    if (copiedVariables.length == 0) {
         return [];
     }
     

@@ -3,6 +3,7 @@
 ## Content
 - [General Info](#Info)
 - [Features](#Features)
+- [Code Content](#code-content)
 - [Supported Language](#supported-languages)
 - [KeyBindings](#keybindings)
 - [Requirements](#Requirements)
@@ -65,6 +66,130 @@ Insert code for multiple print variables according to selected in the drop-down 
 1. After tracking several variables, press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS).
 2. A menu will appear showing all saved variables.
 3. Select one or more variables — a log statement will be inserted for each.
+
+## Code Content
+
+### InsertPrint()
+Insert code to print the value of the last copied variable
+
+#### Parameters:
+- None
+
+#### Return Value:
+- None
+
+
+### InsertPrint()
+Insert code to print the value of the last copied array variable
+
+#### Parameters:
+- None
+
+#### Return Value:
+- None
+
+### InsertMultiplePrints()
+Insert code for multiple print variables according to selected in the drop-down menu
+
+#### Parameters:
+- None
+
+#### Return Value:
+- None
+
+
+### TrackCopy()
+Track copying variables and add them in buffer
+
+#### Parameters:
+- None
+
+#### Return Value:
+- None
+
+
+### GeneratePrintCode()
+Generate code to log a variable according file's language
+
+#### Parameters:
+- variableName (string) - a copied variable name from IDE
+- editor (vscode.TextEditor) - an editor that is attached to a current document
+
+#### Return Value:
+- A string containing generated code to insert in IDE
+
+
+### GenerateArrayPrintCode()
+Generate code to log a array variable according file's language
+
+#### Parameters:
+- arrayName (string) - copied array variable name from IDE
+- editor (vscode.TextEditor) - an editor that is attached to a current document
+
+#### Return Value:
+- A string containing generated code to insert in IDE
+
+
+### GenerateMultiplePrintCode()
+Generate code to log selected multiple variables according file's language
+
+#### Parameters:
+- variables (string[]) - list of selected variables
+- editor (vscode.TextEditor) - an editor that is attached to a current document
+
+#### Return Value:
+- A string containing generated code to insert in IDE
+
+
+### AddToBuffer()
+Add copied variable to buffer. In case a length of buffer exceeds the maxBufferSize it deletes the oldest variable name.
+
+#### Parameters:
+- variableName (string) - copied variable name from IDE
+
+#### Return Value:
+- None
+
+
+### showVariableSelector()
+Generate and show drop-down menu to select variables for logging
+
+#### Parameters:
+- None
+
+#### Return Value:
+- a promise of string[] containing all selected variables
+
+
+### CleanVariableName()
+Clean copied text and check
+
+#### Parameters:
+- text (string) - a copied text
+
+#### Return Value:
+- A string cleared from banned signs in variable's name
+
+
+### GetIndent()
+Get indent of current line where user's cursor is
+
+#### Parameters:
+- editor (vscode.TextEditor) - an editor that is attached to a current document
+
+#### Return Value:
+- A string containing indent
+
+
+### GetCurrentLanguage()
+Get current file's language
+
+#### Parameters:
+- editor (vscode.TextEditor) - an editor that is attached to a current document
+
+#### Return Value:
+- A string containing language's code
+
 
 ## Supported Languages
 
